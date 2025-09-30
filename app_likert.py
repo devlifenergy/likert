@@ -88,7 +88,7 @@ with col1:
 with col2:
     st.markdown(f"""
     <div style="display: flex; align-items: center; height: 100%;">
-        <h1 style='color: {COLOR_TEXT_DARK}; margin: 0; padding: 0;'>D - INVENTÁRIO DE INFRAESTRUTURA</h1>
+        <h1 style='color: {COLOR_TEXT_DARK}; margin: 0; padding: 0;'>INVENTÁRIO DE INFRAESTRUTURA</h1>
     </div>
     """, unsafe_allow_html=True)
 
