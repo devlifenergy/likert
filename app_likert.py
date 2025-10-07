@@ -17,10 +17,10 @@ st.set_page_config(
 # --- CSS CUSTOMIZADO (Omitido para economizar espaço) ---
 st.markdown(f"""<style>...</style>""", unsafe_allow_html=True)
 
-# --- CONEXÃO COM GOOGLE SHEETS (COM CACHE) ---
+# --- CONEXÃO COM GOOGLE SHEETS (MODIFICADO) ---
 @st.cache_resource
 def connect_to_gsheet():
-    """Conecta ao Google Sheets e retorna os objetos das abas."""
+    """Conecta ao Google Sheets e retorna o objeto da aba de respostas."""
     try:
         creds_dict = dict(st.secrets["google_credentials"])
         creds_dict['private_key'] = creds_dict['private_key'].replace('\\n', '\n')
@@ -28,13 +28,13 @@ def connect_to_gsheet():
         gc = gspread.service_account_from_dict(creds_dict)
         spreadsheet = gc.open("Respostas Formularios")
         
-        # Retorna as duas abas que vamos usar
-        return spreadsheet.worksheet("Likert"), spreadsheet.worksheet("Observacoes_Likert")
+        # Retorna apenas a aba de respostas
+        return spreadsheet.worksheet("Likert")
     except Exception as e:
         st.error(f"Erro ao conectar com o Google Sheets: {e}")
-        return None, None
+        return None
 
-ws_respostas, ws_observacoes = connect_to_gsheet()
+ws_respostas = connect_to_gsheet()
 
 if ws_respostas is None:
     st.error("Não foi possível conectar à aba 'Likert' da planilha. Verifique o nome e as permissões.")
@@ -144,10 +144,8 @@ def registrar_resposta(item_id, key):
 
 for bloco in blocos:
     df_bloco = df_itens[df_itens["Bloco"] == bloco]
-    # Extrai o prefixo (sigla) a partir do ID do primeiro item do bloco
     prefixo_bloco = df_bloco['ID'].iloc[0][:2] if not df_bloco.empty else bloco
     
-    # Usa a sigla como título do expander
     with st.expander(f"{prefixo_bloco}", expanded=(bloco == blocos[0])):
         for _, row in df_bloco.iterrows():
             item_id = row["ID"]
@@ -159,7 +157,7 @@ for bloco in blocos:
                 on_change=registrar_resposta, args=(item_id, widget_key)
             )
 
-observacoes = st.text_area("Observações (opcional):")
+# O campo de observações foi removido
 
 # --- BOTÃO DE FINALIZAR E LÓGICA DE RESULTADOS/EXPORTAÇÃO ---
 if st.button("Finalizar e Enviar Respostas", type="primary"):
@@ -220,10 +218,6 @@ if st.button("Finalizar e Enviar Respostas", type="primary"):
                 
                 ws_respostas.append_rows(respostas_para_enviar, value_input_option='USER_ENTERED')
                 
-                if observacoes and ws_observacoes:
-                    dados_obs = [[timestamp_str, respondente, data_turno, observacoes]]
-                    ws_observacoes.append_rows(dados_obs, value_input_option='USER_ENTERED')
-
                 st.success("Suas respostas foram enviadas com sucesso!")
                 st.balloons()
             except Exception as e:
