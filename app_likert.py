@@ -181,39 +181,6 @@ if st.button("Finalizar e Enviar Respostas", type="primary"):
             })
         dfr = pd.DataFrame(respostas_list)
 
-        dfr_numerico = dfr[pd.to_numeric(dfr['Resposta'], errors='coerce').notna()].copy()
-        if not dfr_numerico.empty:
-            dfr_numerico['Resposta'] = dfr_numerico['Resposta'].astype(int)
-            def ajustar_reverso(row):
-                return (6 - row["Resposta"]) if row["Reverso"] == "SIM" else row["Resposta"]
-            dfr_numerico["Pontuação"] = dfr_numerico.apply(ajustar_reverso, axis=1)
-            media_geral = dfr_numerico["Pontuação"].mean()
-            resumo_blocos = dfr_numerico.groupby("Bloco")["Pontuação"].mean().round(2).reset_index(name="Média").sort_values("Média")
-        else:
-            media_geral = 0
-            resumo_blocos = pd.DataFrame(columns=["Bloco", "Média"])
-
-        st.metric("Pontuação Média Geral (somente itens de 1 a 5)", f"{media_geral:.2f}")
-
-        if not resumo_blocos.empty:
-            st.subheader("Média por Dimensão")
-            st.dataframe(resumo_blocos.rename(columns={"Bloco": "Dimensão"}), use_container_width=True, hide_index=True)
-            st.subheader("Gráfico Comparativo por Dimensão")
-            
-            # --- CÓDIGO DO GRÁFICO DE PIZZA ---
-            # Cria a figura e os eixos do gráfico
-            fig, ax = plt.subplots()
-            
-            # Gera o gráfico de pizza, com cores diferentes para cada fatia
-            ax.pie(x=resumo_blocos["Média"], labels=resumo_blocos["Bloco"], autopct='%1.1f%%', startangle=90)
-            
-            # Garante que o gráfico seja desenhado como um círculo
-            ax.axis('equal')
-            
-            # Exibe o gráfico gerado no Streamlit
-            st.pyplot(fig)
-            # --- FIM DO CÓDIGO DO GRÁFICO DE PIZZA ---
-        
         # --- LÓGICA DE ENVIO PARA GOOGLE SHEETS ---
         with st.spinner("Enviando dados para a planilha..."):
             try:
