@@ -235,7 +235,6 @@ if st.button("Finalizar e Enviar Respostas", type="primary", disabled=botao_desa
                     respostas_para_enviar.append([
                         timestamp_str,
                         respondente,
-                        data_turno,
                         org_coletora_valida,
                         row["Bloco"],
                         row["Item"],
