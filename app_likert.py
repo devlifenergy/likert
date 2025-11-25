@@ -356,6 +356,7 @@ else:
                             timestamp_str,
                             id_organizacao,
                             respondente,
+                            data,
                             org_coletora_valida,
                             row["Bloco"],
                             row["Item"],
